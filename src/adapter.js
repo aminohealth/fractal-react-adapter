@@ -94,21 +94,14 @@ class ReactAdapter extends Adapter {
 function registerBabel(app, config) {
   // Extract module aliases (e.g. '@button': '/path/to/button.jsx')
   var aliases = {};
-  app.components.items().forEach(function(item) {
+  app.components.items().forEach(item => {
     aliases['@' + item.handle] = item.viewPath;
   });
 
   // Add resolver plugin aliases to babel config
   // https://github.com/tleunen/babel-plugin-module-resolver
   _.assign(config, {
-    plugins: [
-      [
-        'module-resolver',
-        {
-          alias: aliases
-        }
-      ]
-    ]
+    plugins: [['module-resolver', { alias: aliases }]]
   });
 
   // Hook up that babel
