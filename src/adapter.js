@@ -12,18 +12,27 @@ const babelReg = require('@babel/register');
  * Adpater options
  * ---------------
  * These options can be overridden when the adapter is set up.
- * Syntax: require('./react-adapter')({ options })
+ * Syntax: ReactAdapter({ options })
  *
- * - babelConfig:  any configuration options for babel-register
- *                 https://babeljs.io/docs/usage/babel-register/
+ * - babelConfig:  any additional configuration options for @babel/register
+ *                 https://babeljs.io/docs/en/babel-register/
  *
  * - renderMethod: 'renderToStaticMarkup' or 'renderToString'
  *                 https://facebook.github.io/react/docs/react-dom-server.html
+ *
+ * Example:
+ *
+ *    const reactAdapter = require('@aminohealth/fractal-react-adapter')({
+ *      babelConfig: {
+ *        ignore: ['ignore/some/path']
+ *      }
+ *    });
+ *
  */
 const DEFAULT_OPTIONS = {
   babelConfig: {
     extensions: ['.jsx'],
-    presets: ['es2015', 'react']
+    presets: ['@babel/preset-react']
   },
   renderMethod: 'renderToStaticMarkup'
 };
@@ -111,7 +120,7 @@ function registerBabel(app, config) {
  * --------------------
  */
 module.exports = function(config = {}) {
-  const options = _.assign({}, DEFAULT_OPTIONS, config);
+  const options = _.merge({}, DEFAULT_OPTIONS, config);
 
   return {
     register(source, app) {
