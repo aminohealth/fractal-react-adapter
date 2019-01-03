@@ -2,11 +2,11 @@
 
 const _ = require('lodash');
 const Promise = require('bluebird');
-const Adapter = require('@frctl/fractal').Adapter;
+const { Adapter } = require('@frctl/fractal');
 const React = require('react');
 const ReactDOM = require('react-dom/server');
-const prettyPrint = require('html').prettyPrint;
-const babelReg = require('babel-register');
+const { prettyPrint } = require('html');
+const babelReg = require('@babel/register');
 
 /*
  * Adpater options
