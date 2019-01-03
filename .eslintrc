@@ -1,0 +1,19 @@
+{
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  },
+  "extends": [
+    "prettier",
+  ],
+  "plugins": ["prettier"],
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      { "varsIgnorePattern": "\\b_\\w+_\\b", "args": "none" }
+    ],
+    "semi": ["error", "always"],
+  }
+}

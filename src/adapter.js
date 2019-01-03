@@ -1,13 +1,12 @@
 'use strict';
 
-const _           = require('lodash');
-const Promise     = require('bluebird');
-const Adapter     = require('@frctl/fractal').Adapter;
-const React       = require('react');
-const ReactDOM    = require('react-dom/server');
+const _ = require('lodash');
+const Promise = require('bluebird');
+const Adapter = require('@frctl/fractal').Adapter;
+const React = require('react');
+const ReactDOM = require('react-dom/server');
 const prettyPrint = require('html').prettyPrint;
-const babelReg    = require('babel-register');
-
+const babelReg = require('babel-register');
 
 /*
  * Adpater options
@@ -23,27 +22,24 @@ const babelReg    = require('babel-register');
  */
 const DEFAULT_OPTIONS = {
   babelConfig: {
-    extensions: [".jsx"],
-    presets: ['es2015', 'react'],
+    extensions: ['.jsx'],
+    presets: ['es2015', 'react']
   },
-  renderMethod: 'renderToStaticMarkup',
+  renderMethod: 'renderToStaticMarkup'
 };
-
 
 /*
  * React Adapter
  * -------------
  */
 class ReactAdapter extends Adapter {
-
   constructor(source, app, options) {
     super(null, source);
     this._app = app;
 
-    if(options.renderMethod == 'renderToString') {
+    if (options.renderMethod == 'renderToString') {
       this._renderMethod = ReactDOM.renderToString;
-    }
-    else {
+    } else {
       this._renderMethod = ReactDOM.renderToStaticMarkup;
     }
   }
@@ -67,11 +63,10 @@ class ReactAdapter extends Adapter {
 }
 
 function setEnv(key, value, context) {
-  if (_.isUndefined(context[key]) && ! _.isUndefined(value)) {
+  if (_.isUndefined(context[key]) && !_.isUndefined(value)) {
     context[key] = value;
   }
 }
-
 
 /*
  * Register Babel
@@ -98,16 +93,18 @@ function registerBabel(app, config) {
   // https://github.com/tleunen/babel-plugin-module-resolver
   _.assign(config, {
     plugins: [
-      ["module-resolver", {
-        "alias": aliases
-      }]
+      [
+        'module-resolver',
+        {
+          alias: aliases
+        }
+      ]
     ]
   });
 
   // Hook up that babel
   babelReg(config);
 }
-
 
 /*
  * Adapter registration
@@ -118,12 +115,14 @@ module.exports = function(config = {}) {
 
   return {
     register(source, app) {
-      const componentsReady = () => { registerBabel(app, options.babelConfig) };
+      const componentsReady = () => {
+        registerBabel(app, options.babelConfig);
+      };
       app.components.on('loaded', componentsReady);
       app.components.on('updated', componentsReady);
 
       const adapter = new ReactAdapter(source, app, options);
       return adapter;
     }
-  }
+  };
 };
