@@ -1,77 +1,81 @@
 'use strict';
 
-const _           = require('lodash');
-const Promise     = require('bluebird');
-const Adapter     = require('@frctl/fractal').Adapter;
-const React       = require('react');
-const ReactDOM    = require('react-dom/server');
-const prettyPrint = require('html').prettyPrint;
-const babelReg    = require('babel-register');
-
+const _ = require('lodash');
+const Promise = require('bluebird');
+const { Adapter } = require('@frctl/fractal');
+const React = require('react');
+const ReactDOM = require('react-dom/server');
+const { prettyPrint } = require('html');
+const babelReg = require('@babel/register');
 
 /*
  * Adpater options
  * ---------------
  * These options can be overridden when the adapter is set up.
- * Syntax: require('./react-adapter')({ options })
+ * Syntax: ReactAdapter({ options })
  *
- * - babelConfig:  any configuration options for babel-register
- *                 https://babeljs.io/docs/usage/babel-register/
+ * - babelConfig:  any additional configuration options for @babel/register
+ *                 https://babeljs.io/docs/en/babel-register/
  *
  * - renderMethod: 'renderToStaticMarkup' or 'renderToString'
  *                 https://facebook.github.io/react/docs/react-dom-server.html
+ *
+ * Example:
+ *
+ *    const reactAdapter = require('@aminohealth/fractal-react-adapter')({
+ *      babelConfig: {
+ *        ignore: ['ignore/some/path']
+ *      }
+ *    });
+ *
  */
 const DEFAULT_OPTIONS = {
   babelConfig: {
-    extensions: [".jsx"],
-    presets: ['es2015', 'react'],
+    extensions: ['.jsx'],
+    presets: ['@babel/preset-react']
   },
-  renderMethod: 'renderToStaticMarkup',
+  renderMethod: 'renderToStaticMarkup'
 };
-
 
 /*
  * React Adapter
  * -------------
  */
 class ReactAdapter extends Adapter {
-
   constructor(source, app, options) {
     super(null, source);
     this._app = app;
 
-    if(options.renderMethod == 'renderToString') {
+    if (options.renderMethod == 'renderToString') {
       this._renderMethod = ReactDOM.renderToString;
-    }
-    else {
+    } else {
       this._renderMethod = ReactDOM.renderToStaticMarkup;
     }
   }
 
   render(path, str, context, meta) {
-    meta = meta || {};
+    const fullContext = _.assign(
+      _.pickBy({
+        _self: meta && meta.self,
+        _target: meta && meta.target,
+        _env: meta && meta.env,
+        _config: this.app.config()
+      }),
+      context
+    );
 
-    setEnv('_self', meta.self, context);
-    setEnv('_target', meta.target, context);
-    setEnv('_env', meta.env, context);
-    setEnv('_config', this._app.config(), context);
-
+    // Grab a fresh copy of the component
     delete require.cache[path];
-    const component = require(path);
-    const element = React.createElement(component, context);
-    const renderedHtml = this._renderMethod(element);
-    const prettyHtml = prettyPrint(renderedHtml);
+    const componentImport = require(path);
+    const component = componentImport.default || componentImport;
 
-    return Promise.resolve(prettyHtml);
+    return Promise.resolve(
+      prettyPrint(
+        this.renderMethod(React.createElement(component, fullContext))
+      )
+    );
   }
 }
-
-function setEnv(key, value, context) {
-  if (_.isUndefined(context[key]) && ! _.isUndefined(value)) {
-    context[key] = value;
-  }
-}
-
 
 /*
  * Register Babel
@@ -90,40 +94,37 @@ function setEnv(key, value, context) {
 function registerBabel(app, config) {
   // Extract module aliases (e.g. '@button': '/path/to/button.jsx')
   var aliases = {};
-  app.components.items().forEach(function(item) {
+  app.components.items().forEach(item => {
     aliases['@' + item.handle] = item.viewPath;
   });
 
   // Add resolver plugin aliases to babel config
   // https://github.com/tleunen/babel-plugin-module-resolver
   _.assign(config, {
-    plugins: [
-      ["module-resolver", {
-        "alias": aliases
-      }]
-    ]
+    plugins: [['module-resolver', { alias: aliases }]]
   });
 
   // Hook up that babel
   babelReg(config);
 }
 
-
 /*
  * Adapter registration
  * --------------------
  */
 module.exports = function(config = {}) {
-  const options = _.assign({}, DEFAULT_OPTIONS, config);
+  const options = _.merge({}, DEFAULT_OPTIONS, config);
 
   return {
     register(source, app) {
-      const componentsReady = () => { registerBabel(app, options.babelConfig) };
+      const componentsReady = () => {
+        registerBabel(app, options.babelConfig);
+      };
       app.components.on('loaded', componentsReady);
       app.components.on('updated', componentsReady);
 
       const adapter = new ReactAdapter(source, app, options);
       return adapter;
     }
-  }
+  };
 };

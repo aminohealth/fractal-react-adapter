@@ -1,11 +1,11 @@
 {
-  "name": "fractal-react-adapter",
-  "version": "1.0.2",
+  "name": "@aminohealth/fractal-react-adapter",
+  "version": "0.0.0",
   "description": "Use React as the template engine for Fractal components.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sumul/fractal-react-adapter.git"
+    "url": "https://github.com/aminohealth/fractal-react-adapter"
   },
   "keywords": [
     "fractal",
@@ -14,15 +14,14 @@
   "author": "Sumul Shah <sumul@sumulshah.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sumul/fractal-react-adapter/issues"
+    "url": "https://github.com/aminohealth/fractal-react-adapter/issues"
   },
-  "homepage": "https://github.com/sumul/fractal-react-adapter#readme",
+  "homepage": "https://github.com/aminohealth/fractal-react-adapter#readme",
   "dependencies": {
+    "@babel/preset-react": "^7.0.0",
+    "@babel/register": "^7.0.0",
     "@frctl/fractal": "^1.1.3",
-    "babel-plugin-module-resolver": "^2.7.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-react": "^6.24.1",
-    "babel-register": "^6.24.1",
+    "babel-plugin-module-resolver": "^3.1.1",
     "bluebird": "^3.5.0",
     "html": "^1.0.0",
     "lodash": "^4.17.4",
