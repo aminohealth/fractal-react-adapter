@@ -54,26 +54,26 @@ class ReactAdapter extends Adapter {
   }
 
   render(path, str, context, meta) {
-    meta = meta || {};
+    const fullContext = _.assign(
+      _.pickBy({
+        _self: meta && meta.self,
+        _target: meta && meta.target,
+        _env: meta && meta.env,
+        _config: this.app.config()
+      }),
+      context
+    );
 
-    setEnv('_self', meta.self, context);
-    setEnv('_target', meta.target, context);
-    setEnv('_env', meta.env, context);
-    setEnv('_config', this._app.config(), context);
-
+    // Grab a fresh copy of the component
     delete require.cache[path];
-    const component = require(path);
-    const element = React.createElement(component, context);
-    const renderedHtml = this._renderMethod(element);
-    const prettyHtml = prettyPrint(renderedHtml);
+    const componentImport = require(path);
+    const component = componentImport.default || componentImport;
 
-    return Promise.resolve(prettyHtml);
-  }
-}
-
-function setEnv(key, value, context) {
-  if (_.isUndefined(context[key]) && !_.isUndefined(value)) {
-    context[key] = value;
+    return Promise.resolve(
+      prettyPrint(
+        this.renderMethod(React.createElement(component, fullContext))
+      )
+    );
   }
 }
 
