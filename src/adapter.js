@@ -44,12 +44,12 @@ const DEFAULT_OPTIONS = {
 class ReactAdapter extends Adapter {
   constructor(source, app, options) {
     super(null, source);
-    this._app = app;
+    this.app = app;
 
     if (options.renderMethod == 'renderToString') {
-      this._renderMethod = ReactDOM.renderToString;
+      this.renderMethod = ReactDOM.renderToString;
     } else {
-      this._renderMethod = ReactDOM.renderToStaticMarkup;
+      this.renderMethod = ReactDOM.renderToStaticMarkup;
     }
   }
 
